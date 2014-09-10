@@ -1,0 +1,28 @@
+<configuration>
+    <property name="component.name" value="kafka-logback-appender-test"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="LOG_KAFKA" class="com.github.kafka_tools.logback.KafkaAppender">
+        <topic>example-proto-log</topic>
+        <brokers>${kafka.brokers}</brokers>
+    </appender>
+
+    <appender name="ASYNC_LOG_KAFKA" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="LOG_FILE"/>
+        <queueSize>16384</queueSize>
+    </appender>
+
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="LOG_KAFKA" />
+    </root>
+
+    <logger name="org.apache.http.wire" level="INFO" additivity="true"/>
+    <logger name="org.springframework" level="INFO" additivity="true"/>
+</configuration>
