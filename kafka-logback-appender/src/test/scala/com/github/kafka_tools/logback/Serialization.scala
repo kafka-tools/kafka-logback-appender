@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.{LoggingEventVO, ILoggingEvent, LoggingEvent}
 import org.junit.{Assert, Test}
 
 /**
- * User: Evgeny Zhoga
+ * Author: Evgeny Zhoga
  * Date: 10.09.14
  */
 class Serialization {

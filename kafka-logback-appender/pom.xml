@@ -17,9 +17,9 @@
     <dependencies>
         <!-- Protocol Buffers -->
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>${protobuf-java.version}</version>
+            <groupId>com.github.kafka-tools</groupId>
+            <artifactId>proto-logback</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Kafka + Zookeeper -->
