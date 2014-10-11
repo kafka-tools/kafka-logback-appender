@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 11.10.14
  */
 public class SerializationTest {

@@ -10,7 +10,7 @@ import org.slf4j.Marker;
 import java.util.*;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 09.10.14
  */
 public class ILoggerEvent {
