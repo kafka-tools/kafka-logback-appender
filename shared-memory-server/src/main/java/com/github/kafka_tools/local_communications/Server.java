@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel;
 import static com.github.kafka_tools.local_communications.Constants.*;
 
 /**
+ * Idea is taken from http://stackoverflow.com/questions/2635272/fastest-low-latency-method-for-inter-process-communication-between-java-and-c
  * Author: Evgeny Zhoga
  * Date: 09.10.14
  */
