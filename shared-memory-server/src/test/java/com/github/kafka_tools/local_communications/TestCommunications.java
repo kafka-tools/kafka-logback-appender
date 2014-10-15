@@ -2,6 +2,8 @@ package com.github.kafka_tools.local_communications;
 
 import com.github.kafka_tools.local_communications.client.Client;
 import com.github.kafka_tools.local_communications.client.ClientFactory;
+import com.github.kafka_tools.local_communications.client.impl.TopicClient;
+import com.github.kafka_tools.local_communications.client.impl.TopicClientFactory;
 import com.github.kafka_tools.local_communications.server.HostServer;
 import org.junit.After;
 import org.junit.Before;
@@ -20,53 +22,29 @@ import java.util.List;
 public class TestCommunications {
     private String fileName = "/tmp/bridge";
     private int fileSize = 1024 * 10;
-    private List<String> messages = Arrays.asList("message one", "message 12345 123465", "mmm");
     private Thread serverThread;
-
-    private int serverCounter;
-    private int clientCounter;
 
     @Before
     public void startServerJava() throws IOException {
-        serverCounter = 0;
         new File(fileName).delete();
 
-        HostServer<CI> hs = new HostServer<CI>(
+        HostServer<TopicClient> hs = new HostServer<TopicClient>(
                 fileName,
-                100,
                 new HF(),
-                new F()
-
+                new TopicClientFactory()
         );
         serverThread =new Thread(hs, "host-server");
         serverThread.start();
-/*
-        Server server = new Server(fileName, fileSize, new Handler() {
-            public void handle(byte[] message) {
-                String m = new String(message, Charset.forName("utf-8"));
-                System.out.println(String.format("[%s] [%s] message [%s] received", serverCounter, System.nanoTime(), m));
-                Assert.assertTrue(messages.contains(m));
-                serverCounter += 1;
-            }
-        });
-*/
-
-//        new Thread(server).start();
     }
 
     @Test
     public void testClientJava() throws IOException {
-        Util.log("start test");
-        Client c1 = ClientFactory.getClient(fileName, fileSize, new CI("topic1"));
-        Util.log("got c1");
-        Client c2 = ClientFactory.getClient(fileName, fileSize, new CI("topic1"));
-        Util.log("got c2");
+        Client c1 = ClientFactory.getClient(fileName, fileSize, new TopicClient("topic1"));
+        Client c2 = ClientFactory.getClient(fileName, fileSize, new TopicClient("topic2"));
 
         Charset utf8 = Charset.forName("utf-8");
         c1.send("to topic 1".getBytes(utf8));
-        Util.log("sent to c1");
         c2.send("to topic 2".getBytes(utf8));
-        Util.log("sent to c2");
     }
 
     @After
@@ -74,37 +52,9 @@ public class TestCommunications {
         serverThread.interrupt();
     }
 
-    private class CI implements ClientInfo {
-        private String topic;
-
-        private CI(String topic) {
-            this.topic = topic;
-        }
-
+    class HF implements HandlerFactory<TopicClient> {
         @Override
-        public void write(MemWriter writer) {
-            writer.write(topic);
-        }
-    }
-    class F extends CommunicationInfo.Factory<CI> {
-        @Override
-        public CommunicationInfo<CI> build(String streamName, int bufferSize) {
-            return new CommI(streamName, bufferSize);
-        }
-    }
-    class CommI extends CommunicationInfo<CI> {
-        CommI(String streamName, int bufferSize) {
-            super(streamName, bufferSize);
-        }
-
-        @Override
-        public CI read(MemReader in) {
-            return new CI(in.readString());
-        }
-    }
-    class HF implements HandlerFactory<CI> {
-        @Override
-        public Handler getHandler(final CI ci) {
+        public Handler getHandler(final TopicClient ci) {
             return new Handler() {
                 @Override
                 public void handle(byte[] message) {
