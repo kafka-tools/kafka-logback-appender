@@ -6,9 +6,9 @@ import _root_.kafka.javaapi.producer.Producer
 import _root_.kafka.producer.{KeyedMessage, ProducerConfig}
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.github.kafka_tools.kafka.{Key, Partitioner, KeyEncoder, ValueEncoder}
-import com.github.kafka_tools.local_communications.client.impl.TopicClient
+import com.github.kafka_tools.local_communications.client.impl.{TopicClientFactory, TopicClient}
 import com.github.kafka_tools.local_communications.{HandlerFactory, Handler}
-import com.github.kafka_tools.local_communications.server.EntityServer
+import com.github.kafka_tools.local_communications.server.{HostServer, EntityServer}
 
 /**
  * Author: Evgeny Zhoga
@@ -18,6 +18,14 @@ object Main extends App {
   val fileName = Option(System.getProperty("kafka-tools.server.file-name")).getOrElse("/tmp/kafka.bridge")
   val brokers = Option(System.getProperty("kafka-tools.kafka.brokers")).getOrElse(throw new RuntimeException("Property kafka-tools.kafka.brokers should be set!"))
 
+  val server = new HostServer[TopicClient](
+    fileName,
+    KafkaHandlerFactory,
+    new TopicClientFactory
+  )
+  val serverThread = new Thread(server, "host-server")
+  serverThread.start()
+  serverThread.setDaemon(true)
 }
 
 object KafkaHandlerFactory extends HandlerFactory[TopicClient] {
