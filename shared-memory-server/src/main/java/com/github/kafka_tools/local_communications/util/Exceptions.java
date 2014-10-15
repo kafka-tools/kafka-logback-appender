@@ -1,4 +1,4 @@
-package com.github.kafka_tools.local_communications;
+package com.github.kafka_tools.local_communications.util;
 
 import java.io.IOException;
 

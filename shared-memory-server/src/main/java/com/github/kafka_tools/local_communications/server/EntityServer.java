@@ -2,13 +2,11 @@ package com.github.kafka_tools.local_communications.server;
 
 import com.github.kafka_tools.local_communications.CommunicationInfo;
 import com.github.kafka_tools.local_communications.Handler;
-import com.github.kafka_tools.local_communications.Util;
+import com.github.kafka_tools.local_communications.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.kafka_tools.local_communications.Constants.*;

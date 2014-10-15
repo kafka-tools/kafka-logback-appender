@@ -1,7 +1,7 @@
 package com.github.kafka_tools.local_communications.client.impl;
 
 import com.github.kafka_tools.local_communications.ClientInfo;
-import com.github.kafka_tools.local_communications.MemWriter;
+import com.github.kafka_tools.local_communications.util.MemWriter;
 
 /**
  * Author: Evgeny Zhoga

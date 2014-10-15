@@ -1,6 +1,6 @@
 package com.github.kafka_tools.local_communications;
 
-import java.nio.MappedByteBuffer;
+import com.github.kafka_tools.local_communications.util.MemWriter;
 
 /**
  * Author: Evgeny Zhoga

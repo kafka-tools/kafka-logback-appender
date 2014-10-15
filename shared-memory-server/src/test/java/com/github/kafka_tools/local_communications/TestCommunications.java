@@ -5,6 +5,7 @@ import com.github.kafka_tools.local_communications.client.ClientFactory;
 import com.github.kafka_tools.local_communications.client.impl.TopicClient;
 import com.github.kafka_tools.local_communications.client.impl.TopicClientFactory;
 import com.github.kafka_tools.local_communications.server.HostServer;
+import com.github.kafka_tools.local_communications.util.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +13,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Author: Evgeny Zhoga

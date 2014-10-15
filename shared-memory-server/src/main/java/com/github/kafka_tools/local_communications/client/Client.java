@@ -1,6 +1,6 @@
 package com.github.kafka_tools.local_communications.client;
 
-import com.github.kafka_tools.local_communications.Util;
+import com.github.kafka_tools.local_communications.util.Util;
 
 import java.io.File;
 import java.io.IOException;

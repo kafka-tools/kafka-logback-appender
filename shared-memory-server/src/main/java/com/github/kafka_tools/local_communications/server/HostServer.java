@@ -1,13 +1,15 @@
 package com.github.kafka_tools.local_communications.server;
 
 import com.github.kafka_tools.local_communications.*;
+import com.github.kafka_tools.local_communications.util.Exceptions;
+import com.github.kafka_tools.local_communications.util.MemReader;
+import com.github.kafka_tools.local_communications.util.MemWriter;
+import com.github.kafka_tools.local_communications.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,6 +96,10 @@ public class HostServer<T extends ClientInfo> implements Runnable {
                 }
             } catch (InterruptedException e) {
                 running.set(false);
+                // removes stream files
+                for (File childStream: home.listFiles()) {
+                    childStream.delete();
+                }
             }
         }
     }
