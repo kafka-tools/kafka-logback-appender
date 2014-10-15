@@ -14,7 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.github.kafka_tools.local_communications.Constants.*;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Main server element. Register main exchange stream to add new clients.
+ *
+ * Author: Evgeny Zhoga
  * Date: 13.10.14
  */
 public class HostServer<T extends ClientInfo> implements Runnable {
@@ -28,6 +30,20 @@ public class HostServer<T extends ClientInfo> implements Runnable {
 
     public HostServer(
             final String filesHome,
+            final HandlerFactory<T> handlerFactory,
+            final CommunicationInfo.Factory<T> cf) throws IOException {
+        this(filesHome, 100, handlerFactory, cf);
+    }
+    /**
+     * Creates new host server on top of filesHome directory
+     * @param filesHome folder to keep main stream and all client streams
+     * @param fileSize default size for main stream
+     * @param handlerFactory factory to generate handler depending on client
+     * @param cf factory to generate CommunicationInfo entities, who knows how to read ClientInfo
+     * @throws IOException
+     */
+    public HostServer(
+            final String filesHome,
             final long fileSize,
             final HandlerFactory<T> handlerFactory,
             final CommunicationInfo.Factory<T> cf
@@ -35,7 +51,12 @@ public class HostServer<T extends ClientInfo> implements Runnable {
         this.cf = cf;
         this.home = new File(filesHome);
         this.handlerFactory = handlerFactory;
-        if (!home.exists() && !home.mkdirs()) throw new RuntimeException(String.format("Cannot create dir [%s]", filesHome));
+        if (home.exists()) {
+            for (File childStream: home.listFiles()) {
+                childStream.delete();
+            }
+        }
+        if (!home.exists() && !home.mkdirs()) throw new IOException(String.format("Cannot create dir [%s]", filesHome));
         final File f = new File(home, managingStream);
 
         if (f.exists() && !f.delete()) throw new RuntimeException(String.format("Cannot delete [%s]", f.getAbsolutePath()));
@@ -49,8 +70,7 @@ public class HostServer<T extends ClientInfo> implements Runnable {
     @Override
     public void run() {
         running.set(true);
-        mem.put(0, HOST_WAITING);
-        mem.force();
+        Util.set0byte(mem, HOST_WAITING);
         while (running.get()) {
             try {
                 while (inboxIsEmpty() && running.get()) Thread.sleep(0); // waiting for client request
@@ -65,16 +85,14 @@ public class HostServer<T extends ClientInfo> implements Runnable {
                         registerClient(communicationInfo, clientInfo);
                         MemWriter mw = new MemWriter(mem, 1);
                         mw.write(communicationInfo.getStreamName());
-                        mem.put(0, CLIENT_MUST_READ);
-                        mem.force();
+                        Util.set0byte(mem, CLIENT_MUST_READ);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else if (isClientConfirmed()) {
-                    mem.put(0, HOST_WAITING);
-                    mem.force();
+                    Util.set0byte(mem, HOST_WAITING);
                 }
             } catch (InterruptedException e) {
                 running.set(false);
@@ -83,17 +101,17 @@ public class HostServer<T extends ClientInfo> implements Runnable {
     }
 
     private void registerClient(CommunicationInfo<T> communicationInfo, T clientInfo) throws IOException {
-        new Thread(new Server(home, communicationInfo, handlerFactory.getHandler(clientInfo))).start();
+        new Thread(new EntityServer(home, communicationInfo, handlerFactory.getHandler(clientInfo))).start();
     }
 
     private boolean inboxIsEmpty() {
-        return mem.get(0) == HOST_WAITING || mem.get(0) == CLIENT_MUST_READ;
+        return Util.check0byte(mem, HOST_WAITING, CLIENT_MUST_READ);
     }
     private boolean isClientData() {
-        return mem.get(0) == HOST_MUST_READ;
+        return Util.check0byte(mem, HOST_MUST_READ);
     }
     private boolean isClientConfirmed() {
-        return mem.get(0) == CLIENT_STARTED;
+        return Util.check0byte(mem, CLIENT_STARTED);
     }
 
 

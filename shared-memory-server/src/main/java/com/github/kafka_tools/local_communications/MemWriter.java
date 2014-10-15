@@ -4,7 +4,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 14.10.14
  */
 public class MemWriter {

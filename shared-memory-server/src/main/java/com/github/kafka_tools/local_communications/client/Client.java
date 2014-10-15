@@ -23,13 +23,13 @@ public class Client {
     private boolean bufferExists = false;
     private Pinger pinger;
 
-    public Client(
+    Client(
             final String sharedFilePath,
             final long sharedFileSize) throws IOException {
         this(sharedFilePath, sharedFileSize, false);
     }
 
-    public Client(
+    Client(
             final String sharedFilePath,
             final long sharedFileSize,
             final boolean initBuffer) throws IOException {

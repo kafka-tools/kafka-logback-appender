@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 14.10.14
  */
 public class ClientFactory {
@@ -30,20 +30,18 @@ public class ClientFactory {
                     map(FileChannel.MapMode.READ_WRITE, 0, 100);
             FileLock fileLock = fc.lock(0, 100, true);
             try {
-                while (mainChannel.get(0) != Constants.HOST_WAITING) Thread.sleep(0);
+                while (!Util.check0byte(mainChannel, Constants.HOST_WAITING)) Thread.sleep(0);
 
                 MemWriter memWriter = new MemWriter(mainChannel, 1);
                 memWriter.write(requiredBufferSize);
                 clientData.write(memWriter);
-                mainChannel.put(0, Constants.HOST_MUST_READ);
-                mainChannel.force();
+                Util.set0byte(mainChannel, Constants.HOST_MUST_READ);
 
-                while (mainChannel.get(0) != Constants.CLIENT_MUST_READ) Thread.sleep(0);
+                while (!Util.check0byte(mainChannel, Constants.CLIENT_MUST_READ)) Thread.sleep(0);
                 MemReader mr = new MemReader(mainChannel, 1);
                 String streamName = mr.readString();
 
-                mainChannel.put(0, Constants.CLIENT_STARTED);
-                mainChannel.force();
+                Util.set0byte(mainChannel, Constants.CLIENT_STARTED);
                 return new Client(new File(parent, streamName).getAbsolutePath(), requiredBufferSize);
             } finally {
                 fileLock.release();

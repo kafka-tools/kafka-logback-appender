@@ -1,7 +1,7 @@
 package com.github.kafka_tools
 
 import com.github.kafka_tools.local_communications.Handler
-import com.github.kafka_tools.local_communications.server.Server
+import com.github.kafka_tools.local_communications.server.EntityServer
 
 /**
  * Author: Evgeny Zhoga

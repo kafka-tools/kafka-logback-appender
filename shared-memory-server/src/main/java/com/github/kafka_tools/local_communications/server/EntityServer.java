@@ -18,22 +18,24 @@ import static com.github.kafka_tools.local_communications.Constants.*;
  * Author: Evgeny Zhoga
  * Date: 09.10.14
  */
-public class Server implements Runnable {
+public class EntityServer implements Runnable {
     private final MappedByteBuffer mem;
     private int offset;
     private final Handler handler;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final Watchdog w;
 
-    public Server(
+    private final File stream;
+
+    EntityServer(
             final File home,
             final CommunicationInfo ci,
             final Handler handler
     ) throws IOException {
         this.handler = handler;
-        final File f = new File(home, ci.getStreamName());
-        Util.ensure(f, ci.getBufferSize());
-        this.mem = Util.map(f, ci.getBufferSize());
+        stream = new File(home, ci.getStreamName());
+        Util.ensure(stream, ci.getBufferSize());
+        this.mem = Util.map(stream, ci.getBufferSize());
         w = new Watchdog(new File(home, ci.getWatchdogStreamName()));
     }
 
@@ -85,11 +87,13 @@ public class Server implements Runnable {
         private final MappedByteBuffer mem;
         private int counter = 0;
         private AtomicBoolean stop = new AtomicBoolean(false);
+        private final File watchdogStream;
 
         public Watchdog(
                 final File sharedFile
         ) throws IOException {
             Util.ensure(sharedFile, 1);
+            watchdogStream = sharedFile;
             this.mem = Util.map(sharedFile, 1);
         }
 
@@ -111,6 +115,9 @@ public class Server implements Runnable {
             }
             // 5 seconds no updates from client, so we stop server
             stop();
+
+            watchdogStream.deleteOnExit();
+            stream.deleteOnExit();
         }
     }
 }

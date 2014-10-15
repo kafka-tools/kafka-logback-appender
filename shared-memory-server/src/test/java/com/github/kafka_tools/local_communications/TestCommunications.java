@@ -3,9 +3,7 @@ package com.github.kafka_tools.local_communications;
 import com.github.kafka_tools.local_communications.client.Client;
 import com.github.kafka_tools.local_communications.client.ClientFactory;
 import com.github.kafka_tools.local_communications.server.HostServer;
-import com.github.kafka_tools.local_communications.server.Server;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

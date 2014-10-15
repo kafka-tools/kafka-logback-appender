@@ -8,7 +8,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 14.10.14
  */
 public class Util {
@@ -33,5 +33,15 @@ public class Util {
 
     public static void log(String message) {
         System.out.println(message);
+    }
+
+    public static void set0byte(MappedByteBuffer mem, byte value) {
+        mem.put(0, value);
+        mem.force();
+    }
+    public static boolean check0byte(MappedByteBuffer mem, byte... values) {
+        boolean b = false;
+        for (byte value: values) b = b || mem.get(0) == value;
+        return b;
     }
 }

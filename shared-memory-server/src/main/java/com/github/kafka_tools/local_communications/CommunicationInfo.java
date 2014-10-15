@@ -3,7 +3,7 @@ package com.github.kafka_tools.local_communications;
 import java.nio.MappedByteBuffer;
 
 /**
- * User: Evgeny Zhoga <ezhoga@yandex-team.ru>
+ * Author: Evgeny Zhoga
  * Date: 13.10.14
  */
 public abstract class CommunicationInfo<T extends ClientInfo> {
