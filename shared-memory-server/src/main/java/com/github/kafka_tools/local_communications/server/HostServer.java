@@ -35,7 +35,8 @@ public class HostServer<T extends ClientInfo> implements Runnable {
         this(filesHome, 100, handlerFactory, cf);
     }
     /**
-     * Creates new host server on top of filesHome directory
+     * Creates new host server on top of filesHome directory. filesHome folder will be re-created if exists
+     *
      * @param filesHome folder to keep main stream and all client streams
      * @param fileSize default size for main stream
      * @param handlerFactory factory to generate handler depending on client
@@ -44,7 +45,7 @@ public class HostServer<T extends ClientInfo> implements Runnable {
      */
     public HostServer(
             final String filesHome,
-            final long fileSize,
+            final int fileSize,
             final HandlerFactory<T> handlerFactory,
             final CommunicationInfo.Factory<T> cf
     ) throws IOException {
@@ -55,16 +56,13 @@ public class HostServer<T extends ClientInfo> implements Runnable {
             for (File childStream: home.listFiles()) {
                 childStream.delete();
             }
+            home.delete();
         }
-        if (!home.exists() && !home.mkdirs()) throw new IOException(String.format("Cannot create dir [%s]", filesHome));
+        if (!home.exists() && !home.mkdirs()) Exceptions.io("Cannot create dir [%s]", filesHome);
         final File f = new File(home, managingStream);
 
-        if (f.exists() && !f.delete()) throw new RuntimeException(String.format("Cannot delete [%s]", f.getAbsolutePath()));
-        final RandomAccessFile raf = new RandomAccessFile(f, "rw");
-        raf.setLength(fileSize);
-        this.mem = raf.
-                getChannel().
-                map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
+        Util.ensure(f, fileSize, true);
+        this.mem = Util.map(f, fileSize);
     }
 
     @Override

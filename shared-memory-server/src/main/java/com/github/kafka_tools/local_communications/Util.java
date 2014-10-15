@@ -12,21 +12,29 @@ import java.nio.channels.FileChannel;
  * Date: 14.10.14
  */
 public class Util {
-    public static MappedByteBuffer map(File file,int size) throws IOException {
-        return new RandomAccessFile(file, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
+    public static MappedByteBuffer map(RandomAccessFile raf,int size) throws IOException {
+        return raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
     }
+
+    public static MappedByteBuffer map(File file,int size) throws IOException {
+        return map(new RandomAccessFile(file, "rw"), size);
+    }
+
     public static MappedByteBuffer map(String filePath,int size) throws IOException {
         return map(new File(filePath), size);
     }
+
     public static void ensure(File f, int size, boolean force) throws IOException {
         if ((f.exists() && f.length() != size) || force ) {
-            if (f.delete()) new RandomAccessFile(f, "rw").setLength(size);
+            if (!f.exists() || f.delete()) new RandomAccessFile(f, "rw").setLength(size);
             else throw new IOException("Cannot delete file");
         }
     }
+
     public static void ensure(File f, int size) throws IOException {
         ensure(f, size, false);
     }
+
     public static String getWatchdogThreadName(String baseName) {
         return baseName + "_watchdog";
     }
