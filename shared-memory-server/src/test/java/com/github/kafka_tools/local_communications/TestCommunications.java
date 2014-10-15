@@ -1,5 +1,9 @@
 package com.github.kafka_tools.local_communications;
 
+import com.github.kafka_tools.local_communications.client.Client;
+import com.github.kafka_tools.local_communications.client.ClientFactory;
+import com.github.kafka_tools.local_communications.server.HostServer;
+import com.github.kafka_tools.local_communications.server.Server;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,43 +33,86 @@ public class TestCommunications {
         serverCounter = 0;
         new File(fileName).delete();
 
-        serverThread = new Thread(new Runnable() {
-            Server server = new Server(fileName, fileSize, new Handler() {
-                public void handle(byte[] message) {
-                    String m = new String(message, Charset.forName("utf-8"));
-                    System.out.println(String.format("[%s] [%s] message [%s] received", serverCounter, System.nanoTime(), m));
-                    Assert.assertTrue(messages.contains(m));
-                    serverCounter += 1;
-                }
-            });
+        HostServer<CI> hs = new HostServer<CI>(
+                fileName,
+                100,
+                new HF(),
+                new F()
 
-            public void run() {
-                try {
-                    server.run();
-                } catch (InterruptedException e) {
-                    System.out.println("server was stopped");
-                }
-
+        );
+        serverThread =new Thread(hs, "host-server");
+        serverThread.start();
+/*
+        Server server = new Server(fileName, fileSize, new Handler() {
+            public void handle(byte[] message) {
+                String m = new String(message, Charset.forName("utf-8"));
+                System.out.println(String.format("[%s] [%s] message [%s] received", serverCounter, System.nanoTime(), m));
+                Assert.assertTrue(messages.contains(m));
+                serverCounter += 1;
             }
         });
-        serverThread.start();
+*/
+
+//        new Thread(server).start();
     }
 
     @Test
     public void testClientJava() throws IOException {
-        Client client = new Client(fileName, fileSize);
-        clientCounter = 0;
-        for (int i = 0;i < 1000;i++) {
-            for (String m : messages) {
-                System.out.println(String.format("[%s] [%s] message [%s] will be sent", clientCounter, System.nanoTime(), m));
-                client.send(m.getBytes(Charset.forName("utf-8")));
-                clientCounter += 1;
-            }
-        }
+        Util.log("start test");
+        Client c1 = ClientFactory.getClient(fileName, fileSize, new CI("topic1"));
+        Util.log("got c1");
+        Client c2 = ClientFactory.getClient(fileName, fileSize, new CI("topic1"));
+        Util.log("got c2");
+
+        Charset utf8 = Charset.forName("utf-8");
+        c1.send("to topic 1".getBytes(utf8));
+        Util.log("sent to c1");
+        c2.send("to topic 2".getBytes(utf8));
+        Util.log("sent to c2");
     }
 
     @After
     public void stop() {
         serverThread.interrupt();
+    }
+
+    private class CI implements ClientInfo {
+        private String topic;
+
+        private CI(String topic) {
+            this.topic = topic;
+        }
+
+        @Override
+        public void write(MemWriter writer) {
+            writer.write(topic);
+        }
+    }
+    class F extends CommunicationInfo.Factory<CI> {
+        @Override
+        public CommunicationInfo<CI> build(String streamName, int bufferSize) {
+            return new CommI(streamName, bufferSize);
+        }
+    }
+    class CommI extends CommunicationInfo<CI> {
+        CommI(String streamName, int bufferSize) {
+            super(streamName, bufferSize);
+        }
+
+        @Override
+        public CI read(MemReader in) {
+            return new CI(in.readString());
+        }
+    }
+    class HF implements HandlerFactory<CI> {
+        @Override
+        public Handler getHandler(final CI ci) {
+            return new Handler() {
+                @Override
+                public void handle(byte[] message) {
+                    Util.log(ci.topic + ": " + new String(message, Charset.forName("utf-8")));
+                }
+            };
+        }
     }
 }
